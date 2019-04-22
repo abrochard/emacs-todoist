@@ -51,6 +51,8 @@
 (defconst todoist-buffer-name
   "*todoist*")
 
+(defvar todoist--cached-projects nil)
+
 (defun todoist--query (method endpoint &optional data)
   "Main function to interact with Todoist api.
 
@@ -59,10 +61,18 @@ ENDPOINT is the endpoint string.
 DATA is the request body."
   (let ((url (concat todoist-url endpoint))
         (url-request-method method)
-        (url-request-extra-headers `(("Authorization" . ,(concat "Bearer " todoist-token)))))
+        (url-request-extra-headers `(("Authorization" . ,(concat "Bearer " todoist-token))
+                                     ("Content-Type". "application/json")))
+        (url-request-data data))
     (with-current-buffer (url-retrieve-synchronously url)
       (goto-char url-http-end-of-headers)
       (json-read))))
+
+(defun todoist--task-id (task)
+  "Get the task id.
+
+TASK is the task object."
+  (assoc-default 'id task))
 
 (defun todoist--task-date (task)
   "Get the task due date.
@@ -115,13 +125,24 @@ TODO is optional to make this a todo heading."
       (insert (format "\n%s TODO %s" (make-string level ?*) str))
     (insert (format "\n%s %s" (make-string level ?*) str))))
 
+(defun todoist--insert-task (task level todo)
+  "Insert the task as 'org-mode' bullet.
+
+TASK is the task.
+LEVEL is the ord heading level.
+TODO is boolean to show TODO tag."
+  (todoist--insert-heading level (todoist--task-content task) todo)
+  (when (todoist--task-date task)
+    (org-deadline nil (todoist--task-date task)))
+  (org-set-property "TODOIST_ID" (format "%s" (todoist--task-id task))))
+
 (defun todoist--insert-project (project tasks)
   "Insert the current project and matching tasks as org buttet list.
 
 PROJECT the project object.
 TASKS the list of all tasks."
   (todoist--insert-heading 2 (todoist--project-name project))
-  (mapcar (lambda (task) (todoist--insert-heading 3 (todoist--task-content task)))
+  (mapcar (lambda (task) (todoist--insert-task task 3 nil))
           (todoist--filter-tasks project tasks)))
 
 (defun todoist--inbox-id (projects)
@@ -140,26 +161,30 @@ TASK is the task."
                  (concat (todoist--task-date task) " 00:00:00"))
                 (current-time))))
 
-(defun todoist--insert-task (task)
-  "Insert the task as 'org-mode' bullet.
-
-TASK is the task."
-  (todoist--insert-heading 2 (todoist--task-content task) t)
-  (org-deadline nil (todoist--task-date task)))
-
 (defun todoist--insert-today (tasks)
   "Insert today's tasks.
 
 TASKS is the list of tasks."
-  (mapcar 'todoist--insert-task (-filter 'todoist--is-today tasks)))
+  (mapcar (lambda (task) (todoist--insert-task task 2 t)) (-filter 'todoist--is-today tasks)))
 
-(defun todoist--get-projects ()
-  "Get the list of all projects."
-  (append (todoist--query "GET" "/projects") nil))
+(defun todoist--get-projects (&optional cache)
+  "Get the list of all projects.
+
+CACHE to read from cache rather than query upstream."
+  (if cache
+      todoist--cached-projects
+    (setq todoist--cached-projects
+          (append (todoist--query "GET" "/projects") nil))))
 
 (defun todoist--get-tasks ()
   "Get the list of all tasks."
   (append (todoist--query "GET" "/tasks") nil))
+
+
+(defun todoist-new-task (content due)
+  (interactive "sTask content: \nsDue: ")
+  (todoist--query "POST" "/tasks" (json-encode `(("content" . ,content) ("due_string" . ,due))))
+  (todoist))
 
 (defun todoist--fold-projects ()
   "Fold the project list."
@@ -167,6 +192,13 @@ TASKS is the list of tasks."
     (goto-char (point-min))
     (re-search-forward "^\\* Projects$")
     (org-cycle)))
+
+(defun todoist--fold-today ()
+  "Fold the today list to hide properties."
+  (save-excursion
+    (goto-char (point-min))
+    (re-search-forward "^\\* Today$")
+    (org-cycle) (org-cycle)))
 
 (defun todoist ()
   "Main function to summon the todoist dashboard as 'org-mode'."
@@ -181,7 +213,8 @@ TASKS is the list of tasks."
       (todoist--insert-today tasks)
       (todoist--insert-heading 1 "Projects")
       (mapcar (lambda (project) (todoist--insert-project project tasks)) projects)
-      (todoist--fold-projects))))
+      (todoist--fold-projects)
+      (todoist--fold-today))))
 
 (provide 'todoist)
 ;;; todoist.el ends here
