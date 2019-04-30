@@ -13,13 +13,13 @@ Emacs interface to todoist
 4. Call `M-x todoist` to pull up your tasks.
 
 ## TODO
- - mark task as done
- - update task name
- - reschedule task
- - delete task
- - create task under a project
- - own mode?
- - project CRUD operations
+ - [X] mark task as done
+ - [X] update task name
+ - [X] reschedule task
+ - [ ] delete task
+ - [ ] create task under a project
+ - [ ] own mode?
+ - [ ] project CRUD operations
 
 ## Disclaimer
 This extension is not created by, affiliated with, or supported by Doist.
