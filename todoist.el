@@ -61,12 +61,15 @@ ENDPOINT is the endpoint string.
 DATA is the request body."
   (let ((url (concat todoist-url endpoint))
         (url-request-method method)
-        (url-request-extra-headers `(("Authorization" . ,(concat "Bearer " todoist-token))
-                                     ("Content-Type". "application/json")))
+        (url-request-extra-headers (append`(("Authorization" . ,(concat "Bearer " todoist-token)))
+                                          (when data '(("Content-Type". "application/json")))))
         (url-request-data data))
     (with-current-buffer (url-retrieve-synchronously url)
       (goto-char url-http-end-of-headers)
-      (json-read))))
+      ;; (message (buffer-string))
+      (if (equal (buffer-substring (point) (point-max)) "\n") ;; no body
+          nil
+        (json-read)))))
 
 (defun todoist--task-id (task)
   "Get the task id.
@@ -180,12 +183,6 @@ CACHE to read from cache rather than query upstream."
   "Get the list of all tasks."
   (append (todoist--query "GET" "/tasks") nil))
 
-
-(defun todoist-new-task (content due)
-  (interactive "sTask content: \nsDue: ")
-  (todoist--query "POST" "/tasks" (json-encode `(("content" . ,content) ("due_string" . ,due))))
-  (todoist))
-
 (defun todoist--fold-projects ()
   "Fold the project list."
   (save-excursion
@@ -199,6 +196,45 @@ CACHE to read from cache rather than query upstream."
     (goto-char (point-min))
     (re-search-forward "^\\* Today$")
     (org-cycle) (org-cycle)))
+
+(defun todoist--under-cursor-task-id ()
+  "Get the todoist task id of the task under the cursor."
+  (save-excursion
+    (org-back-to-heading)
+    (org-element-property :TODOIST_ID (org-element-at-point))))
+
+(defun todoist--parse-org-time-string (str)
+  "Parse an org timestring into a simple YYYY-MM-DD string.
+
+STR is an org time string."
+  (unless (eq str nil)
+    (string-match "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}+\\) .*>" str)
+    (match-string 1 str)))
+
+;;; interactive
+(defun todoist-new-task (content due)
+  "Create a new task.
+
+CONTENT is the content string.
+DUE is the human friendly due string and can be empty."
+  (interactive "sTask content: \nsDue: ")
+  (todoist--query "POST" "/tasks" (json-encode `(("content" . ,content) ("due_string" . ,due))))
+  (todoist))
+
+(defun todoist-update-task ()
+  "Update the content and due date of the task under cursor."
+  (interactive)
+  (let ((task-id (todoist--under-cursor-task-id))
+        (content (read-string "Task content: " (org-entry-get nil "ITEM")))
+        (due (read-string "Task due: " (todoist--parse-org-time-string (org-entry-get nil "DEADLINE")))))
+    (todoist--query "POST" (format "/tasks/%s" task-id) (json-encode `(("content" . ,content) ("due_string" . ,due))))
+    (todoist)))
+
+(defun todoist-close-task ()
+  "Close the task under the cursor, marking it as done or checking it."
+  (interactive)
+  (todoist--query "POST" (format "/tasks/%s/close" (todoist--under-cursor-task-id)))
+  (todoist))
 
 (defun todoist ()
   "Main function to summon the todoist dashboard as 'org-mode'."
