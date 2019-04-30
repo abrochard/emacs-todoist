@@ -230,6 +230,12 @@ DUE is the human friendly due string and can be empty."
     (todoist--query "POST" (format "/tasks/%s" task-id) (json-encode `(("content" . ,content) ("due_string" . ,due))))
     (todoist)))
 
+(defun todoist-delete-task ()
+  "Delete the task under the cusror."
+  (interactive)
+  (todoist--query "DELETE" (format "/tasks/%s" (todoist--under-cursor-task-id)))
+  (todoist))
+
 (defun todoist-close-task ()
   "Close the task under the cursor, marking it as done or checking it."
   (interactive)
