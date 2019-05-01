@@ -19,7 +19,7 @@ Emacs interface to todoist
  - [X] delete task
  - [ ] create task under a project
  - [ ] own mode?
- - [ ] project CRUD operations
+ - [X] project CRUD operations
 
 ## Disclaimer
 This extension is not created by, affiliated with, or supported by Doist.

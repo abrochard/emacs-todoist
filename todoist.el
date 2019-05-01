@@ -211,7 +211,36 @@ STR is an org time string."
     (string-match "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}+\\) .*>" str)
     (match-string 1 str)))
 
+
+(defun todoist--select-project (&optional cache)
+  "Take user input to select a project object from a list.
+
+CACHE is optional param to get projects from cache."
+  (let* ((projects (todoist--get-projects cache))
+         (name (completing-read "Select project: " (mapcar 'todoist--project-name projects))))
+    (-find (lambda (x) (equal (todoist--project-name x) name)) projects)))
+
 ;;; interactive
+;;; project management
+(defun todoist-new-project (name)
+  "Create a new project.
+
+NAME is the name of the project."
+  (interactive "sProject name: ")
+  (todoist--query "POST" "/projects" (json-encode `(("name" . ,name)))))
+
+(defun todoist-update-project ()
+  "Change the name of a project."
+  (interactive)
+  (todoist--query "POST" (format "/projects/%s" (todoist--project-id (todoist--select-project)))
+                  (json-encode `(("name" . ,(read-string "New project name: "))))))
+
+(defun todoist-delete-project ()
+  "Delete a project."
+  (interactive)
+  (todoist--query "DELETE" (format "/projects/%s" (todoist--project-id (todoist--select-project)))))
+
+;;; task managmement
 (defun todoist-new-task (content due)
   "Create a new task.
 
