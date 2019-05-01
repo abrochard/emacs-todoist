@@ -137,7 +137,8 @@ TODO is boolean to show TODO tag."
   (todoist--insert-heading level (todoist--task-content task) todo)
   (when (todoist--task-date task)
     (org-deadline nil (todoist--task-date task)))
-  (org-set-property "TODOIST_ID" (format "%s" (todoist--task-id task))))
+  (org-set-property "TODOIST_ID" (format "%s" (todoist--task-id task)))
+  (org-set-property "TODOIST_PROJECT_ID" (format "%s" (todoist--task-project-id task))))
 
 (defun todoist--insert-project (project tasks)
   "Insert the current project and matching tasks as org buttet list.
@@ -241,13 +242,17 @@ NAME is the name of the project."
   (todoist--query "DELETE" (format "/projects/%s" (todoist--project-id (todoist--select-project)))))
 
 ;;; task managmement
-(defun todoist-new-task (content due)
+(defun todoist-new-task (content due p)
   "Create a new task.
 
 CONTENT is the content string.
-DUE is the human friendly due string and can be empty."
-  (interactive "sTask content: \nsDue: ")
-  (todoist--query "POST" "/tasks" (json-encode `(("content" . ,content) ("due_string" . ,due))))
+DUE is the human friendly due string and can be empty.
+P is a prefix argument to select a project."
+  (interactive "sTask content: \nsDue: \nP")
+  (todoist--query "POST" "/tasks"
+                  (json-encode (append `(("content" . ,content) ("due_string" . ,due))
+                                       (when p
+                                         `(("project_id" . ,(todoist--project-id (todoist--select-project))))))))
   (todoist))
 
 (defun todoist-update-task ()
@@ -258,6 +263,15 @@ DUE is the human friendly due string and can be empty."
         (due (read-string "Task due: " (todoist--parse-org-time-string (org-entry-get nil "DEADLINE")))))
     (todoist--query "POST" (format "/tasks/%s" task-id) (json-encode `(("content" . ,content) ("due_string" . ,due))))
     (todoist)))
+
+;; doesn't work??
+;; (defun todoist-assign-task ()
+;;   "Assign the task under the cursor to a specific project."
+;;   (interactive)
+;;   (let ((task-id (todoist--under-cursor-task-id))
+;;         (project-id (todoist--project-id (todoist--select-project))))
+;;     (todoist--query "POST" (format "/tasks/%s" task-id) (json-encode `(("project_id" . ,project-id))))
+;;     (todoist)))
 
 (defun todoist-delete-task ()
   "Delete the task under the cusror."

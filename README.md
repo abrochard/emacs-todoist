@@ -17,7 +17,7 @@ Emacs interface to todoist
  - [X] update task name
  - [X] reschedule task
  - [X] delete task
- - [ ] create task under a project
+ - [X] create task under a project
  - [ ] own mode?
  - [X] project CRUD operations
 
