@@ -12,14 +12,7 @@ Emacs interface to todoist
    b. Environment variable as `TODOIST_TOKEN`
 4. Call `M-x todoist` to pull up your tasks.
 
-## TODO
- - [X] mark task as done
- - [X] update task name
- - [X] reschedule task
- - [X] delete task
- - [X] create task under a project
- - [ ] own mode?
- - [X] project CRUD operations
+## Usage
 
 ## Disclaimer
 This extension is not created by, affiliated with, or supported by Doist.
