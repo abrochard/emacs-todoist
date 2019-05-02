@@ -24,7 +24,7 @@
 ;; Keywords: todoist task todo
 ;; URL: https://github.com/abrochard/emacs-todoist
 ;; License: GNU General Public License >= 3
-;; Package-Requires: ((dash "2.15.0") (emacs "25.3"))
+;; Package-Requires: ((dash "2.15.0") (transient "0.1.0") (emacs "25.3"))
 
 ;;; Commentary:
 
@@ -41,6 +41,7 @@
 ;;; Code:
 
 (require 'dash)
+(require 'transient)
 
 (defvar todoist-token
   (getenv "TODOIST_TOKEN"))
@@ -285,6 +286,37 @@ P is a prefix argument to select a project."
   (todoist--query "POST" (format "/tasks/%s/close" (todoist--under-cursor-task-id)))
   (todoist))
 
+;; transient interface
+(define-transient-command todoist-task-menu ()
+  "Manage Todoist tasks."
+  ["Actions"
+   ("c" "Close task" todoist-close-task)
+   ("n" "New task" todoist-new-task)
+   ("u" "Update task" todoist-update-task)
+   ("d" "Delete task" todoist-delete-task)])
+
+(define-transient-command todoist-project-menu ()
+  "Manage Todoist projects."
+  ["Actions"
+   ("n" "New project" todoist-new-project)
+   ("u" "Update project" todoist-update-project)
+   ("d" "Delete project" todoist-delete-project)])
+
+(defvar todoist-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-x t") 'todoist-task-menu)
+    (define-key map (kbd "C-x p") 'todoist-project-menu)
+   map)
+  "Keymap for `todoist-mode'.")
+
+(define-derived-mode todoist-mode org-mode "Todoist"
+  "Special mode for todoist buffers."
+  (setq mode-name "Todoist")
+  (setq major-mode 'todoist-mode)
+  (use-local-map todoist-mode-map)
+  (run-mode-hooks 'kubel-mode-hook))
+
+;; main function
 (defun todoist ()
   "Main function to summon the todoist dashboard as 'org-mode'."
   (interactive)
@@ -292,7 +324,7 @@ P is a prefix argument to select a project."
          (tasks (todoist--get-tasks)))
     (with-output-to-temp-buffer todoist-buffer-name
       (switch-to-buffer todoist-buffer-name)
-      (org-mode)
+      (todoist-mode)
       (insert "#+title: Todoist\n")
       (todoist--insert-heading 1 "Today")
       (todoist--insert-today tasks)
