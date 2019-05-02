@@ -1,4 +1,4 @@
-;;; package --- Summary -*- lexical-binding: t; -*-
+;;; todoist.el --- extension for interacting and managing todoist tasks -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019, Adrien Brochard
 
@@ -21,7 +21,7 @@
 
 ;; Version: 1.0
 ;; Author: Adrien Brochard
-;; Keywords: todoist task todo
+;; Keywords: todoist task todo comm
 ;; URL: https://github.com/abrochard/emacs-todoist
 ;; License: GNU General Public License >= 3
 ;; Package-Requires: ((dash "2.15.0") (transient "0.1.0") (emacs "25.3"))
@@ -32,11 +32,14 @@
 
 ;;; Setup:
 
-;; Get your token
+;; Get your token (https://todoist.com/Users/viewPrefs?page=integrations)
+;; and shove it as (setq todoist-token "XXXXXXXX")
 
 ;;; Usage:
 
-;; M-x todoist
+;; M-x todoist to pull up tasks
+;; C-x t for the task menu
+;; C-x p for the project menu
 
 ;;; Code:
 
