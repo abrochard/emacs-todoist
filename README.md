@@ -1,5 +1,5 @@
 # emacs-todoist
-Emacs interface to todoist
+Emacs interface to [Todoist](https://todoist.com)
 
 ## Installation
 1. Load the `todoist.el` file
