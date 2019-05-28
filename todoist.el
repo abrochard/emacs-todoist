@@ -129,8 +129,7 @@ TASKS the list of tasks."
 LEVEL is the level.
 STR is the heading title.
 TODO is optional to make this a todo heading."
-  ;; (end-of-line)
-  (end-of-buffer)
+  (goto-char (point-max))
   (if todo
       (insert (format "\n%s TODO %s" (make-string level ?*) str))
     (insert (format "\n%s %s" (make-string level ?*) str))))
