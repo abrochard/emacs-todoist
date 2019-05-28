@@ -24,7 +24,7 @@
 ;; Keywords: todoist task todo comm
 ;; URL: https://github.com/abrochard/emacs-todoist
 ;; License: GNU General Public License >= 3
-;; Package-Requires: ((dash "2.15.0") (transient "0.1.0") (emacs "25.3"))
+;; Package-Requires: ((dash "2.15.0") (transient "0.1.0") (org "8.3.5") (emacs "25.3"))
 
 ;;; Commentary:
 
@@ -45,6 +45,9 @@
 
 (require 'dash)
 (require 'transient)
+(require 'org)
+(require 'json)
+(require 'url)
 
 (defvar todoist-token
   (getenv "TODOIST_TOKEN"))
