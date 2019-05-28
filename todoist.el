@@ -334,7 +334,7 @@ P is a prefix argument to select a project."
       (todoist--insert-heading 1 "Today")
       (todoist--insert-today tasks)
       (todoist--insert-heading 1 "Projects")
-      (mapcar (lambda (project) (todoist--insert-project project tasks)) projects)
+      (mapc (lambda (project) (todoist--insert-project project tasks)) projects)
       (todoist--fold-projects)
       (todoist--fold-today))))
 
