@@ -1,4 +1,4 @@
-;;; todoist.el --- extension for interacting and managing todoist tasks -*- lexical-binding: t; -*-
+;;; todoist.el --- Extension for interacting and managing todoist tasks -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019, Adrien Brochard
 
