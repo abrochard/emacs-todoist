@@ -48,6 +48,7 @@
 (require 'org)
 (require 'json)
 (require 'url)
+(require 'url-http)
 
 (defvar todoist-token
   (getenv "TODOIST_TOKEN"))
