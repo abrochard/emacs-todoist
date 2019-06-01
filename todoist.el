@@ -318,11 +318,7 @@ P is a prefix argument to select a project."
   "Keymap for `todoist-mode'.")
 
 (define-derived-mode todoist-mode org-mode "Todoist"
-  "Special mode for todoist buffers."
-  (setq mode-name "Todoist")
-  (setq major-mode 'todoist-mode)
-  (use-local-map todoist-mode-map)
-  (run-mode-hooks 'kubel-mode-hook))
+  "Special mode for todoist buffers.")
 
 ;; main function
 (defun todoist ()
