@@ -50,6 +50,8 @@
 (require 'url)
 (require 'url-http)
 
+(defvar url-http-end-of-headers)  ; silence byte-compiler warnings
+
 (defvar todoist-token
   (getenv "TODOIST_TOKEN"))
 
