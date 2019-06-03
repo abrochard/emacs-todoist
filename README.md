@@ -1,8 +1,10 @@
+[![MELPA](https://melpa.org/packages/todoist-badge.svg)](https://melpa.org/#/todoist)
+
 # emacs-todoist
 Emacs interface to [Todoist](https://todoist.com)
 
 ## Installation
-1. Load the `todoist.el` file
+1. Get it from Melpa, or load the `todoist.el` file
 2. Get your Todoist personal API token [here](https://todoist.com/Users/viewPrefs?page=integrations)
 3. Load it up via
 
