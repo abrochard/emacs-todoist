@@ -3,6 +3,8 @@
 # emacs-todoist
 Emacs interface to [Todoist](https://todoist.com)
 
+![alt text](screenshot.png)
+
 ## Installation
 1. Get it from Melpa, or load the `todoist.el` file
 2. Get your Todoist personal API token [here](https://todoist.com/Users/viewPrefs?page=integrations)
