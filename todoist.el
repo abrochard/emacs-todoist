@@ -75,8 +75,7 @@ DATA is the request body."
     (with-current-buffer (url-retrieve-synchronously url)
       (goto-char url-http-end-of-headers)
       ;; (message (buffer-string))
-      (if (equal (buffer-substring (point) (point-max)) "\n") ;; no body
-          nil
+      (unless (string-equal (buffer-substring (point) (point-max)) "\n") ;; no body
         (json-read)))))
 
 (defun todoist--task-id (task)
@@ -335,7 +334,7 @@ P is a prefix argument to select a project."
       (todoist--insert-heading 1 "Today")
       (todoist--insert-today tasks)
       (todoist--insert-heading 1 "Projects")
-      (mapc (lambda (project) (todoist--insert-project project tasks)) projects)
+      (dolist (p projects) (todoist--insert-project p tasks))
       (todoist--fold-projects)
       (todoist--fold-today))))
 
