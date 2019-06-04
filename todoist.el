@@ -78,7 +78,7 @@ DATA is the request body."
       (goto-char url-http-end-of-headers)
       ;; (message (buffer-string))
       (unless (string-equal (buffer-substring (point) (point-max)) "\n") ;; no body
-        (json-read)))))
+        (json-read-from-string (decode-coding-region (point) (point-max) 'utf-8 t))))))
 
 (defun todoist--task-id (task)
   "Get the task id.
