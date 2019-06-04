@@ -319,7 +319,7 @@ P is a prefix argument to select a project."
 (define-derived-mode todoist-mode org-mode "Todoist"
   "Special mode for todoist buffers.")
 
-;; main function
+;;;###autoload
 (defun todoist ()
   "Main function to summon the todoist dashboard as 'org-mode'."
   (interactive)
