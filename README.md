@@ -32,6 +32,9 @@ these menus will respectively allow you to:
 - create/update/delete/close tasks
 - create/update/delete projects
 
+
+*Please note that the usual `C-c C-t` org-mode task shortcut will not close the task for todoist. It might be a useful feature in the future.*
+
 ## Disclaimer
 This extension is not created by, affiliated with, or supported by Doist.
 
