@@ -72,6 +72,11 @@
   :group 'todoist
   :type 'number)
 
+(defcustom todoist-backing-buffer nil
+  "File location of the todoist backing buffer."
+  :group 'todoist
+  :type 'string)
+
 (defvar todoist--cached-projects nil)
 
 (defun todoist--query (method endpoint &optional data)
@@ -304,6 +309,15 @@ P is a prefix argument to select a project."
   (todoist--query "POST" (format "/tasks/%s/close" (todoist--under-cursor-task-id)))
   (todoist))
 
+
+(defun todoist--write-to-file-if-needed ()
+  "Write todoist buffer to file if backing-buffer is defined."
+  (when todoist-backing-buffer
+    (let ((buffer (get-file-buffer todoist-backing-buffer)))
+      (when buffer
+        (kill-buffer buffer)))
+    (write-file todoist-backing-buffer)))
+
 ;; transient interface
 (define-transient-command todoist-task-menu ()
   "Manage Todoist tasks."
@@ -345,7 +359,8 @@ P is a prefix argument to select a project."
       (todoist--insert-heading 1 "Projects")
       (dolist (p projects) (todoist--insert-project p tasks))
       (todoist--fold-projects)
-      (todoist--fold-today))))
+      (todoist--fold-today)
+      (todoist--write-to-file-if-needed))))
 
 (provide 'todoist)
 ;;; todoist.el ends here

@@ -32,6 +32,11 @@ these menus will respectively allow you to:
 - create/update/delete/close tasks
 - create/update/delete projects
 
+### Customization
+
+- `todoist-backing-buffer`
+  Set it to a file path and the todoist task list will be saved on disk at that location, making it easy to add todoist tasks to a custom agenda view.
+
 
 *Please note that the usual `C-c C-t` org-mode task shortcut will not close the task for todoist. It might be a useful feature in the future.*
 
