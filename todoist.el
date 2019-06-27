@@ -77,6 +77,11 @@
   :group 'todoist
   :type 'string)
 
+(defcustom todoist-show-all nil
+  "If not nil, show all tasks un-collapsed."
+  :group 'todoist
+  :type 'bool)
+
 (defvar todoist--cached-projects nil)
 
 (defun todoist--query (method endpoint &optional data)
@@ -222,6 +227,10 @@ CACHE to read from cache rather than query upstream."
     (re-search-forward "^\\* Today$")
     (org-cycle) (org-cycle)))
 
+(defun todoist--show-all ()
+  "Only fold top level."
+  (org-global-cycle 3))
+
 (defun todoist--under-cursor-task-id ()
   "Get the todoist task id of the task under the cursor."
   (save-excursion
@@ -358,8 +367,10 @@ P is a prefix argument to select a project."
       (todoist--insert-today tasks)
       (todoist--insert-heading 1 "Projects")
       (dolist (p projects) (todoist--insert-project p tasks))
-      (todoist--fold-projects)
-      (todoist--fold-today)
+      (if todoist-show-all
+          (todoist--show-all)
+        (todoist--fold-projects)
+        (todoist--fold-today))
       (todoist--write-to-file-if-needed))))
 
 (provide 'todoist)
