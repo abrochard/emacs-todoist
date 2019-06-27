@@ -39,6 +39,8 @@ these menus will respectively allow you to:
 - `todoist-backing-buffer`
   Set it to a file path and the todoist task list will be saved on disk at that location, making it easy to add todoist tasks to a custom agenda view.
 
+- `todoist-show-all`
+  If true, show all tasks un-collpased. Default is nil for default view.
 
 ## Disclaimer
 This extension is not created by, affiliated with, or supported by Doist.
