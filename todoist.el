@@ -56,7 +56,7 @@
   (getenv "TODOIST_TOKEN"))
 
 (defconst todoist-url
-  "https://beta.todoist.com/API/v8")
+  "https://api.todoist.com/rest/v1")
 
 (defconst todoist-buffer-name
   "*todoist*")
