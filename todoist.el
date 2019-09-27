@@ -96,10 +96,19 @@ DATA is the request body."
                                           (when data '(("Content-Type". "application/json")))))
         (url-request-data data))
     (with-current-buffer (url-retrieve-synchronously url nil nil todoist-timeout)
+      (let ((status (todoist--parse-status-code)))
+        (unless (string-match-p "2.." status)
+          (throw 'bad-response (format "Bad status code returned: %s" status))))
       (goto-char url-http-end-of-headers)
-      ;; (message (buffer-string))
       (unless (string-equal (buffer-substring (point) (point-max)) "\n") ;; no body
         (json-read-from-string (decode-coding-region (point) (point-max) 'utf-8 t))))))
+
+(defun todoist--parse-status-code ()
+  "Parse the todoist response status code."
+  (save-excursion
+    (goto-char (point-min))
+    (re-search-forward "HTTP/1.1 \\([0-9]\\{3\\}\\)")
+    (match-string-no-properties 1)))
 
 (defun todoist--task-id (task)
   "Get the task id.
