@@ -94,14 +94,17 @@ DATA is the request body."
         (url-request-method method)
         (url-request-extra-headers (append`(("Authorization" . ,(concat "Bearer " todoist-token)))
                                           (when data '(("Content-Type". "application/json")))))
-        (url-request-data data))
+        (url-request-data data)
+        (response nil))
     (with-current-buffer (url-retrieve-synchronously url nil nil todoist-timeout)
       (let ((status (todoist--parse-status-code)))
         (unless (string-match-p "2.." status)
           (throw 'bad-response (format "Bad status code returned: %s" status))))
       (goto-char url-http-end-of-headers)
-      (unless (string-equal (buffer-substring (point) (point-max)) "\n") ;; no body
-        (json-read-from-string (decode-coding-region (point) (point-max) 'utf-8 t))))))
+      (setq response (unless (string-equal (buffer-substring (point) (point-max)) "\n") ;; no body
+                    (json-read-from-string (decode-coding-region (point) (point-max) 'utf-8 t))))
+      (kill-buffer (current-buffer)) ;; kill the buffer to free up some memory
+      response)))
 
 (defun todoist--parse-status-code ()
   "Parse the todoist response status code."
