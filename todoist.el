@@ -295,9 +295,11 @@ DUE is the human friendly due string and can be empty.
 P is a prefix argument to select a project."
   (interactive "sTask content: \nsDue: \nP")
   (todoist--query "POST" "/tasks"
-                  (json-encode (append `(("content" . ,content) ("due_string" . ,due))
-                                       (when p
-                                         `(("project_id" . ,(todoist--project-id (todoist--select-project))))))))
+                  (encode-coding-string
+                   (json-encode (append `(("content" . ,content) ("due_string" . ,due))
+                                        (when p
+                                          `(("project_id" . ,(todoist--project-id (todoist--select-project)))))))
+                   'utf-8))
   (todoist))
 
 (defun todoist-update-task ()
@@ -306,7 +308,7 @@ P is a prefix argument to select a project."
   (let ((task-id (todoist--under-cursor-task-id))
         (content (read-string "Task content: " (org-entry-get nil "ITEM")))
         (due (read-string "Task due: " (todoist--parse-org-time-string (org-entry-get nil "DEADLINE")))))
-    (todoist--query "POST" (format "/tasks/%s" task-id) (json-encode `(("content" . ,content) ("due_string" . ,due))))
+    (todoist--query "POST" (format "/tasks/%s" task-id) (encode-coding-string (json-encode `(("content" . ,content) ("due_string" . ,due))) 'utf-8))
     (todoist)))
 
 ;; doesn't work??
