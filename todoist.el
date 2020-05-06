@@ -273,13 +273,13 @@ CACHE is optional param to get projects from cache."
 
 NAME is the name of the project."
   (interactive "sProject name: ")
-  (todoist--query "POST" "/projects" (json-encode `(("name" . ,name)))))
+  (todoist--query "POST" "/projects" (encode-coding-string (json-encode `(("name" . ,name))) 'utf-8)))
 
 (defun todoist-update-project ()
   "Change the name of a project."
   (interactive)
   (todoist--query "POST" (format "/projects/%s" (todoist--project-id (todoist--select-project)))
-                  (json-encode `(("name" . ,(read-string "New project name: "))))))
+                  (encode-coding-string (json-encode `(("name" . ,(read-string "New project name: ")))) 'utf-8)))
 
 (defun todoist-delete-project ()
   "Delete a project."
