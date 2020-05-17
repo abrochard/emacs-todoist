@@ -94,7 +94,8 @@ DATA is the request body."
         (url-request-method method)
         (url-request-extra-headers (append`(("Authorization" . ,(concat "Bearer " todoist-token)))
                                           (when data '(("Content-Type". "application/json")))))
-        (url-request-data data)
+        (url-request-data (if data
+                              (encode-coding-string (json-encode data) 'utf-8)))
         (response nil))
     (with-current-buffer (url-retrieve-synchronously url nil nil todoist-timeout)
       (let ((status (todoist--parse-status-code)))
@@ -273,13 +274,13 @@ CACHE is optional param to get projects from cache."
 
 NAME is the name of the project."
   (interactive "sProject name: ")
-  (todoist--query "POST" "/projects" (encode-coding-string (json-encode `(("name" . ,name))) 'utf-8)))
+  (todoist--query "POST" "/projects" `(("name" . ,name))))
 
 (defun todoist-update-project ()
   "Change the name of a project."
   (interactive)
   (todoist--query "POST" (format "/projects/%s" (todoist--project-id (todoist--select-project)))
-                  (encode-coding-string (json-encode `(("name" . ,(read-string "New project name: ")))) 'utf-8)))
+                  `(("name" . ,(read-string "New project name: ")))))
 
 (defun todoist-delete-project ()
   "Delete a project."
@@ -295,11 +296,9 @@ DUE is the human friendly due string and can be empty.
 P is a prefix argument to select a project."
   (interactive "sTask content: \nsDue: \nP")
   (todoist--query "POST" "/tasks"
-                  (encode-coding-string
-                   (json-encode (append `(("content" . ,content) ("due_string" . ,due))
-                                        (when p
-                                          `(("project_id" . ,(todoist--project-id (todoist--select-project)))))))
-                   'utf-8))
+                  (append `(("content" . ,content) ("due_string" . ,due))
+                          (when p
+                            `(("project_id" . ,(todoist--project-id (todoist--select-project)))))))
   (todoist))
 
 (defun todoist-update-task ()
@@ -308,7 +307,7 @@ P is a prefix argument to select a project."
   (let ((task-id (todoist--under-cursor-task-id))
         (content (read-string "Task content: " (org-entry-get nil "ITEM")))
         (due (read-string "Task due: " (todoist--parse-org-time-string (org-entry-get nil "DEADLINE")))))
-    (todoist--query "POST" (format "/tasks/%s" task-id) (encode-coding-string (json-encode `(("content" . ,content) ("due_string" . ,due))) 'utf-8))
+    (todoist--query "POST" (format "/tasks/%s" task-id) `(("content" . ,content) ("due_string" . ,due)))
     (todoist)))
 
 ;; doesn't work??
