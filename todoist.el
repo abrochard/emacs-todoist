@@ -20,8 +20,6 @@
 ;; USA
 
 ;; Version: 1.0
-;; Package-Version: 20200517.1825
-;; Package-Commit: b3f003603111b7e31b94c354cf4c83c8208c01c3
 ;; Author: Adrien Brochard
 ;; Keywords: todoist task todo comm
 ;; URL: https://github.com/abrochard/emacs-todoist
