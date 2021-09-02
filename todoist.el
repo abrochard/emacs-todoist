@@ -20,6 +20,8 @@
 ;; USA
 
 ;; Version: 1.0
+;; Package-Version: 20200517.1825
+;; Package-Commit: b3f003603111b7e31b94c354cf4c83c8208c01c3
 ;; Author: Adrien Brochard
 ;; Keywords: todoist task todo comm
 ;; URL: https://github.com/abrochard/emacs-todoist
@@ -150,6 +152,13 @@ PROJECT is the project object."
 PROJECT is the project object."
   (assoc-default 'name project))
 
+(defun todoist--task-description (task)
+  "Get the description.
+
+TASK is the task object"
+
+    (assoc-default 'description task))
+
 (defun todoist--filter-tasks (project tasks)
   "Get subset of tasks under a project.
 
@@ -180,7 +189,8 @@ TODO is boolean to show TODO tag."
   (when (todoist--task-date task)
     (org-deadline nil (todoist--task-date task)))
   (org-set-property "TODOIST_ID" (format "%s" (todoist--task-id task)))
-  (org-set-property "TODOIST_PROJECT_ID" (format "%s" (todoist--task-project-id task))))
+  (org-set-property "TODOIST_PROJECT_ID" (format "%s" (todoist--task-project-id task)))
+  (insert (format "\n%s %s\n" (make-string level ?\s) (todoist--task-description task))))
 
 (defun todoist--insert-project (project tasks)
   "Insert the current project and matching tasks as org buttet list.
