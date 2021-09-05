@@ -188,7 +188,10 @@ TODO is boolean to show TODO tag."
     (org-deadline nil (todoist--task-date task)))
   (org-set-property "TODOIST_ID" (format "%s" (todoist--task-id task)))
   (org-set-property "TODOIST_PROJECT_ID" (format "%s" (todoist--task-project-id task)))
-  (insert (format "\n%s %s\n" (make-string level ?\s) (todoist--task-description task))))
+  (goto-char (point-max))
+  (when-let ((description (todoist--task-description task))
+             (not-empty (> (length description) 0)))
+    (insert (format "\n%s %s\n" (make-string level ?\s) description))))
 
 (defun todoist--insert-project (project tasks)
   "Insert the current project and matching tasks as org buttet list.
