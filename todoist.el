@@ -191,7 +191,7 @@ TODO is boolean to show TODO tag."
   (goto-char (point-max))
   (when-let ((description (todoist--task-description task))
              (not-empty (> (length description) 0)))
-    (insert (format "\n%s %s\n" (make-string level ?\s) description))))
+    (insert (replace-regexp-in-string (rx line-start) (make-string level ?\s) description))))
 
 (defun todoist--insert-project (project tasks)
   "Insert the current project and matching tasks as org buttet list.
