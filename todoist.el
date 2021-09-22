@@ -289,7 +289,9 @@ first task will be deleted."
              (not org-refile-keep))
     ;; Using query directly instead of `todoist-delete-task' for performance. Since the task was
     ;; refiled there's no need to refresh the todoist buffer to remove it.
-    (todoist--query "DELETE" (format "/tasks/%s" (todoist--under-cursor-task-id)))))
+    (todoist--query "DELETE" (format "/tasks/%s" (todoist--under-cursor-task-id)))
+    (org-delete-property "TODOIST_ID")
+    (org-delete-property "TODOIST_PROJECT_ID")))
 
 ;;; interactive
 ;;; project management
