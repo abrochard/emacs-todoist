@@ -83,6 +83,11 @@
   :group 'todoist
   :type 'bool)
 
+(defcustom todoist-refile-todo-keyword "TODO"
+  "If not nil, add `org-todo' keyword when refiling."
+  :group 'todoist
+  :type 'string)
+
 (defvar todoist--cached-projects nil)
 
 (defun todoist--query (method endpoint &optional data)
@@ -291,7 +296,10 @@ first task will be deleted."
     ;; refiled there's no need to refresh the todoist buffer to remove it.
     (todoist--query "DELETE" (format "/tasks/%s" (todoist--under-cursor-task-id)))
     (org-delete-property "TODOIST_ID")
-    (org-delete-property "TODOIST_PROJECT_ID")))
+    (org-delete-property "TODOIST_PROJECT_ID")
+    (unless (or (org-entry-is-todo-p)  ;; User may have already added a todo keyword, don't overwrite.
+                (not todoist-refile-todo-keyword))
+      (org-todo todoist-refile-todo-keyword))))
 
 ;;; interactive
 ;;; project management
