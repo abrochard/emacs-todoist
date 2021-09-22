@@ -46,6 +46,7 @@
 (require 'dash)
 (require 'transient)
 (require 'org)
+(require 'org-refile)
 (require 'json)
 (require 'url)
 (require 'url-http)
@@ -278,6 +279,18 @@ CACHE is optional param to get projects from cache."
          (name (completing-read "Select project: " (mapcar 'todoist--project-name projects))))
     (-find (lambda (x) (equal (todoist--project-name x) name)) projects)))
 
+(defun todoist--refile-handler ()
+  "Delete todoist task when refiled elsewhere. Called via `org-after-refile-insert-hook'.
+
+CAVEAT: Does not correctly handle refiling a region with multiple tasks. In this case, only the
+first task will be deleted."
+  (when (and (todoist--under-cursor-task-id)
+             (not (equal todoist-buffer-name (buffer-name))) ;; Refiled to another buffer.
+             (not org-refile-keep))
+    ;; Using query directly instead of `todoist-delete-task' for performance. Since the task was
+    ;; refiled there's no need to refresh the todoist buffer to remove it.
+    (todoist--query "DELETE" (format "/tasks/%s" (todoist--under-cursor-task-id)))))
+
 ;;; interactive
 ;;; project management
 (defun todoist-new-project (name)
@@ -396,7 +409,9 @@ P is a prefix argument to select a project."
           (todoist--show-all)
         (todoist--fold-projects)
         (todoist--fold-today))
-      (todoist--write-to-file-if-needed))))
+      (todoist--write-to-file-if-needed)
+      ;; Global hook, not local, because it's called from the refile destination.
+      (add-hook 'org-after-refile-insert-hook #'todoist--refile-handler))))
 
 (provide 'todoist)
 ;;; todoist.el ends here
