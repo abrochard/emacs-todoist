@@ -375,7 +375,7 @@ P is a prefix argument to select a project."
     (write-file todoist-backing-buffer)))
 
 ;; transient interface
-(define-transient-command todoist-task-menu ()
+(transient-define-prefix todoist-task-menu ()
   "Manage Todoist tasks."
   ["Actions"
    ("c" "Close task" todoist-close-task)
@@ -383,7 +383,7 @@ P is a prefix argument to select a project."
    ("u" "Update task" todoist-update-task)
    ("d" "Delete task" todoist-delete-task)])
 
-(define-transient-command todoist-project-menu ()
+(transient-define-prefix todoist-project-menu ()
   "Manage Todoist projects."
   ["Actions"
    ("n" "New project" todoist-new-project)
