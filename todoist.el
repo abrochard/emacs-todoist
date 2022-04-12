@@ -32,7 +32,7 @@
 
 ;;; Setup:
 
-;; Get your token (https://todoist.com/Users/viewPrefs?page=integrations)
+;; Get your token (https://todoist.com/app/settings/integrations
 ;; and shove it as (setq todoist-token "XXXXXXXX")
 
 ;;; Usage:
