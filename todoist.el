@@ -335,6 +335,21 @@ P is a prefix argument to select a project."
                             `(("project_id" . ,(todoist--project-id (todoist--select-project)))))))
   (todoist))
 
+
+(defun todoist-quick-new-task (content due p)
+  "Create a new task without loading the todoist-buffer.
+
+CONTENT is the content string.
+DUE is the human friendly due string and can be empty.
+P is a prefix argument to select a project."
+  (interactive "sTask content: \nsDue: \nP")
+  (todoist--query "POST" "/tasks"
+                  (append `(("content" . ,content) ("due_string" . ,due))
+                          (when p
+                            `(("project_id" . ,(todoist--project-id (todoist--select-project)))))))
+  (message "Task created successfully."))
+
+
 (defun todoist-update-task ()
   "Update the content and due date of the task under cursor."
   (interactive)
@@ -380,6 +395,7 @@ P is a prefix argument to select a project."
   ["Actions"
    ("c" "Close task" todoist-close-task)
    ("n" "New task" todoist-new-task)
+   ("q" "Quick new task" todoist-quick-new-task)
    ("u" "Update task" todoist-update-task)
    ("d" "Delete task" todoist-delete-task)])
 
