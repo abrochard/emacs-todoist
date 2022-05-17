@@ -31,7 +31,6 @@
 ;; Emacs extension for interacting with the task tracking service todoist
 
 ;;; Setup:
-
 ;; Get your token (https://todoist.com/app/settings/integrations
 ;; and shove it as (setq todoist-token "XXXXXXXX")
 
@@ -243,6 +242,17 @@ CACHE to read from cache rather than query upstream."
   "Get the list of all tasks."
   (append (todoist--query "GET" "/tasks") nil))
 
+(defun todoist--create-new-task (content due p)
+  "Query todoist to create new task.
+
+CONTENT is the content string.
+DUE is the human friendly due string and can be empty.
+P is a prefix argument to select a project."
+  (todoist--query "POST" "/tasks"
+                  (append `(("content" . ,content) ("due_string" . ,due))
+                          (when p
+                            `(("project_id" . ,(todoist--project-id (todoist--select-project))))))))
+
 (defun todoist--fold-projects ()
   "Fold the project list."
   (save-excursion
@@ -329,11 +339,20 @@ CONTENT is the content string.
 DUE is the human friendly due string and can be empty.
 P is a prefix argument to select a project."
   (interactive "sTask content: \nsDue: \nP")
-  (todoist--query "POST" "/tasks"
-                  (append `(("content" . ,content) ("due_string" . ,due))
-                          (when p
-                            `(("project_id" . ,(todoist--project-id (todoist--select-project)))))))
+  (todoist--create-new-task content due p)
   (todoist))
+
+
+(defun todoist-quick-new-task (content due p)
+  "Create a new task without loading the todoist-buffer.
+
+CONTENT is the content string.
+DUE is the human friendly due string and can be empty.
+P is a prefix argument to select a project."
+  (interactive "sTask content: \nsDue: \nP")
+  (todoist--create-new-task content due p)
+  (message "Task created successfully."))
+
 
 (defun todoist-update-task ()
   "Update the content and due date of the task under cursor."
@@ -380,6 +399,7 @@ P is a prefix argument to select a project."
   ["Actions"
    ("c" "Close task" todoist-close-task)
    ("n" "New task" todoist-new-task)
+   ("q" "Quick new task" todoist-quick-new-task)
    ("u" "Update task" todoist-update-task)
    ("d" "Delete task" todoist-delete-task)])
 
