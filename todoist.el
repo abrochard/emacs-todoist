@@ -368,8 +368,7 @@ P is a prefix argument to select a project."
         (content (read-string "Task content: " (org-entry-get nil "ITEM")))
         (if todoist-use-scheduled-instead-of-deadline
             (due (read-string "Task due: " (todoist--parse-org-time-string (org-entry-get nil "SCHEDULED"))))
-            (due (read-string "Task due: " (todoist--parse-org-time-string (org-entry-get nil "DEADLINE"))))
-        )
+            (due (read-string "Task due: " (todoist--parse-org-time-string (org-entry-get nil "DEADLINE"))))))
     (todoist--query "POST" (format "/tasks/%s" task-id) `(("content" . ,content) ("due_string" . ,due)))
     (todoist)))
 
