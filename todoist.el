@@ -19,7 +19,7 @@
 ;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 ;; USA
 
-;; Version: 1.0
+;; Version: 1.1
 ;; Author: Adrien Brochard
 ;; Keywords: todoist task todo comm
 ;; URL: https://github.com/abrochard/emacs-todoist
