@@ -87,7 +87,7 @@
   :group 'todoist
   :type 'string)
 
-(defcustom todoist-use-scheduled-instead-of-deadline t
+(defcustom todoist-use-scheduled-instead-of-deadline nil
   "If not nil, use SCHEDULED instead of DEADLINE in org files."
   :group 'todoist
   :type 'bool)
