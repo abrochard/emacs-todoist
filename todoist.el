@@ -19,7 +19,7 @@
 ;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 ;; USA
 
-;; Version: 1.0
+;; Version: 1.1
 ;; Author: Adrien Brochard
 ;; Keywords: todoist task todo comm
 ;; URL: https://github.com/abrochard/emacs-todoist
@@ -86,6 +86,11 @@
   "If not nil, add `org-todo' keyword when refiling."
   :group 'todoist
   :type 'string)
+
+(defcustom todoist-use-scheduled-instead-of-deadline nil
+  "If not nil, use SCHEDULED instead of DEADLINE in org files."
+  :group 'todoist
+  :type 'bool)
 
 (defvar todoist--cached-projects nil)
 
@@ -190,7 +195,9 @@ LEVEL is the ord heading level.
 TODO is boolean to show TODO tag."
   (todoist--insert-heading level (todoist--task-content task) todo)
   (when (todoist--task-date task)
-    (org-deadline nil (todoist--task-date task)))
+    (if todoist-use-scheduled-instead-of-deadline
+      (org-schedule nil (todoist--task-date task))
+      (org-deadline nil (todoist--task-date task))))
   (org-set-property "TODOIST_ID" (format "%s" (todoist--task-id task)))
   (org-set-property "TODOIST_PROJECT_ID" (format "%s" (todoist--task-project-id task)))
   (goto-char (point-max))
@@ -359,7 +366,9 @@ P is a prefix argument to select a project."
   (interactive)
   (let ((task-id (todoist--under-cursor-task-id))
         (content (read-string "Task content: " (org-entry-get nil "ITEM")))
-        (due (read-string "Task due: " (todoist--parse-org-time-string (org-entry-get nil "DEADLINE")))))
+        (due (if todoist-use-scheduled-instead-of-deadline
+          (read-string "Task due: " (todoist--parse-org-time-string (org-entry-get nil "SCHEDULED")))
+          (read-string "Task due: " (todoist--parse-org-time-string (org-entry-get nil "DEADLINE"))))))
     (todoist--query "POST" (format "/tasks/%s" task-id) `(("content" . ,content) ("due_string" . ,due)))
     (todoist)))
 
