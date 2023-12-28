@@ -400,7 +400,7 @@ P is a prefix argument to select a project."
     (let ((buffer (get-file-buffer todoist-backing-buffer)))
       (when buffer
         (kill-buffer buffer)))
-    (write-file todoist-backing-buffer)))
+    (write-region nil nil todoist-backing-buffer)))
 
 ;; transient interface
 (transient-define-prefix todoist-task-menu ()
