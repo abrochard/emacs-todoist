@@ -94,6 +94,8 @@
 
 (defvar todoist--cached-projects nil)
 
+(defvar todoist--cached-sections nil)
+
 (defun todoist--query (method endpoint &optional data)
   "Main function to interact with Todoist api.
 
@@ -148,6 +150,30 @@ TASK is the task object."
 TASK is the task object"
   (assoc-default 'project_id task))
 
+(defun todoist--task-section-id (task)
+  "Get the task section id.
+
+TASK is the task object"
+  (assoc-default 'section_id task))
+
+(defun todoist--section-id (section)
+  "Get the section id.
+
+SECTION is the section object"
+  (assoc-default 'id section))
+
+(defun todoist--section-project-id (section)
+  "Get the section project id.
+
+SECTION is the section object"
+  (assoc-default 'project_id section))
+
+(defun todoist--section-name (section)
+  "Get the section name.
+
+SECTION is the section object"
+  (assoc-default 'name section))
+
 (defun todoist--project-id (project)
   "Get the project id.
 
@@ -167,13 +193,15 @@ TASK is the task object"
 
     (assoc-default 'description task))
 
-(defun todoist--filter-tasks (project tasks)
+(defun todoist--filter-tasks (project section tasks)
   "Get subset of tasks under a project.
 
 PROJECT the project.
 TASKS the list of tasks."
   (-filter (lambda (task)
-             (equal (todoist--task-project-id task) (todoist--project-id project)))
+             (and
+                (equal (todoist--task-project-id task) (todoist--project-id project))
+                (or (null section) (equal (todoist--task-section-id task) (todoist--section-id section)))))
            tasks))
 
 (defun todoist--insert-heading (level str &optional todo)
@@ -205,14 +233,23 @@ TODO is boolean to show TODO tag."
              (not-empty (> (length description) 0)))
     (insert (replace-regexp-in-string (rx line-start) (make-string level ?\s) description))))
 
-(defun todoist--insert-project (project tasks)
-  "Insert the current project and matching tasks as org buttet list.
+(defun todoist--insert-project (project sections tasks)
+  "Insert the current project and matching tasks as org bullet list.
 
 PROJECT the project object.
+SECTIONS is the list of all sections
 TASKS the list of all tasks."
+  ;; TODO not if sections is null but rather if this project has no sections -> iterate sections for project id
   (todoist--insert-heading 2 (todoist--project-name project))
-  (mapcar (lambda (task) (todoist--insert-task task 3 nil))
-          (todoist--filter-tasks project tasks)))
+  (if (or (null sections) (null (-filter (lambda (section) (equal (todoist--section-project-id section) (todoist--project-id project))) sections)))
+        (mapcar (lambda (task) (todoist--insert-task task 3 nil))
+                (todoist--filter-tasks project nil tasks))
+
+        (dolist (s sections)
+        (if (equal (todoist--section-project-id s) (todoist--project-id project))
+                (progn (todoist--insert-heading 3 (todoist--section-name s))
+                (mapcar (lambda (task) (todoist--insert-task task 4 nil))
+                        (todoist--filter-tasks project s tasks)))))))
 
 (defun todoist--inbox-id (projects)
   "Get the project id of the inbox.
@@ -244,6 +281,15 @@ CACHE to read from cache rather than query upstream."
       todoist--cached-projects
     (setq todoist--cached-projects
           (append (todoist--query "GET" "/projects") nil))))
+
+(defun todoist--get-sections (&optional cache)
+  "Get the list of all sections.
+
+CACHE to read from cache rather than query upstream."
+  (if cache
+      todoist--cached-sections
+    (setq todoist--cached-sections
+          (append (todoist--query "GET" "/sections") nil))))
 
 (defun todoist--get-tasks ()
   "Get the list of all tasks."
@@ -434,7 +480,8 @@ P is a prefix argument to select a project."
   "Main function to summon the todoist dashboard as 'org-mode'."
   (interactive)
   (let ((projects (todoist--get-projects))
-         (tasks (todoist--get-tasks)))
+         (tasks (todoist--get-tasks))
+         (sections (todoist--get-sections)))
     (with-temp-buffer todoist-buffer-name
       (pop-to-buffer todoist-buffer-name)
       (delete-region (point-min) (point-max))
@@ -443,9 +490,9 @@ P is a prefix argument to select a project."
       (todoist--insert-heading 1 "Today")
       (todoist--insert-today tasks)
       (todoist--insert-heading 1 "Projects")
-      (dolist (p projects) (todoist--insert-project p tasks))
+      (dolist (p projects) (todoist--insert-project p sections tasks))
       (if todoist-show-all
-          (todoist--show-all)
+        (todoist--show-all)
         (todoist--fold-projects)
         (todoist--fold-today))
       (todoist--write-to-file-if-needed)
