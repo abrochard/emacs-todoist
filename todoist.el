@@ -199,15 +199,28 @@ TASK is the task object"
 TASK is the task object"
   (null (todoist--task-section-id task)))
 
+(defun todoist--task-in-section (task section)
+  "Get if a task is in the supplied section.
+
+TASK is the task object
+SECTION is the section object"
+  (equal (todoist--task-section-id task) (todoist--section-id section)))
+
+(defun todoist--task-in-project (task project)
+  "Get if a task is in the supplied project.
+
+TASK is the task object
+PROJECT is the project object"
+  (equal (todoist--task-project-id task) (todoist--project-id project)))
+
 (defun todoist--filter-tasks (project tasks &optional section)
   "Get subset of tasks under a project.
 
 PROJECT the project.
 TASKS the list of tasks."
   (-filter (lambda (task)
-             (and
-                (equal (todoist--task-project-id task) (todoist--project-id project))
-                (or (null section) (equal (todoist--task-section-id task) (todoist--section-id section)))))
+             (and (todoist--task-in-project task project)
+                  (or (null section) (todoist--task-in-section task section))))
            tasks))
 
 (defun todoist--insert-heading (level str &optional todo)
@@ -246,16 +259,19 @@ PROJECT the project object.
 SECTIONS is the list of all sections
 TASKS the list of all tasks."
   (todoist--insert-heading 2 (todoist--project-name project))
-  ; If there are no sections, list all tasks at level 3
+  ; If there are no sections in this project, list all tasks at level 3
   (if (or (null sections) (null (-filter (lambda (section) (equal (todoist--section-project-id section) (todoist--project-id project))) sections)))
     (mapcar (lambda (task) (todoist--insert-task task 3 nil))
       (todoist--filter-tasks project tasks))
 
-  ; Insert tasks without section_id's in the "Unsectioned" heading
-  (let ((unsectioned (-filter #'todoist--task-is-sectionless tasks)))
+  ; Insert this project's tasks without section_id's in the "Unsectioned" heading
+  (let ((unsectioned (-filter (lambda (task) (and
+                                (todoist--task-is-sectionless task)
+                                (todoist--task-in-project task project))) tasks)))
     (unless (null unsectioned)
     (todoist--insert-heading 3 "Unsectioned")
     (dolist (u unsectioned) (todoist--insert-task u 4 nil))))
+
   ; Insert tasks under all sections
   (dolist (s sections)
   (if (equal (todoist--section-project-id s) (todoist--project-id project))
