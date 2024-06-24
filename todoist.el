@@ -193,7 +193,13 @@ TASK is the task object"
 
     (assoc-default 'description task))
 
-(defun todoist--filter-tasks (project section tasks)
+(defun todoist--task-is-sectionless (task)
+  "Get if a task has not been assigned to a section.
+
+TASK is the task object"
+  (null (todoist--task-section-id task)))
+
+(defun todoist--filter-tasks (project tasks &optional section)
   "Get subset of tasks under a project.
 
 PROJECT the project.
@@ -239,17 +245,23 @@ TODO is boolean to show TODO tag."
 PROJECT the project object.
 SECTIONS is the list of all sections
 TASKS the list of all tasks."
-  ;; TODO not if sections is null but rather if this project has no sections -> iterate sections for project id
   (todoist--insert-heading 2 (todoist--project-name project))
+  ; If there are no sections, list all tasks at level 3
   (if (or (null sections) (null (-filter (lambda (section) (equal (todoist--section-project-id section) (todoist--project-id project))) sections)))
-        (mapcar (lambda (task) (todoist--insert-task task 3 nil))
-                (todoist--filter-tasks project nil tasks))
+    (mapcar (lambda (task) (todoist--insert-task task 3 nil))
+      (todoist--filter-tasks project tasks))
 
-        (dolist (s sections)
-        (if (equal (todoist--section-project-id s) (todoist--project-id project))
-                (progn (todoist--insert-heading 3 (todoist--section-name s))
-                (mapcar (lambda (task) (todoist--insert-task task 4 nil))
-                        (todoist--filter-tasks project s tasks)))))))
+  ; Insert tasks without section_id's in the "Unsectioned" heading
+  (let ((unsectioned (-filter #'todoist--task-is-sectionless tasks)))
+    (unless (null unsectioned)
+    (todoist--insert-heading 3 "Unsectioned")
+    (dolist (u unsectioned) (todoist--insert-task u 4 nil))))
+  ; Insert tasks under all sections
+  (dolist (s sections)
+  (if (equal (todoist--section-project-id s) (todoist--project-id project))
+    (progn (todoist--insert-heading 3 (todoist--section-name s))
+    (mapcar (lambda (task) (todoist--insert-task task 4 nil))
+      (todoist--filter-tasks project tasks s)))))))
 
 (defun todoist--inbox-id (projects)
   "Get the project id of the inbox.
