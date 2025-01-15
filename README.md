@@ -52,4 +52,4 @@ This extension is not created by, affiliated with, or supported by Doist.
 If there is a missing feature that you would like implemented, or if you find a bug, feel free to open up an issue, or even better, a pull request.
 
 ## Related projects
-- I also recommend checking out [org-todoist(https://github.com/Lillenne/org-todoist)], a great Emacs package for bidirectional incremental sync of Org Mode elements with Todoist.
+- I also recommend checking out [org-todoist](https://github.com/Lillenne/org-todoist), a great Emacs package for bidirectional incremental sync of Org Mode elements with Todoist.
