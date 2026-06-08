@@ -56,7 +56,7 @@
   (getenv "TODOIST_TOKEN"))
 
 (defconst todoist-url
-  "https://api.todoist.com/rest/v2")
+  "https://api.todoist.com/api/v1")
 
 (defconst todoist-buffer-name
   "*todoist*")
@@ -104,8 +104,8 @@ ENDPOINT is the endpoint string.
 DATA is the request body."
   (let ((url (concat todoist-url endpoint))
         (url-request-method method)
-        (url-request-extra-headers (append`(("Authorization" . ,(concat "Bearer " todoist-token)))
-                                          (when data '(("Content-Type". "application/json")))))
+        (url-request-extra-headers (append `(("Authorization" . ,(concat "Bearer " todoist-token)))
+                                          '(("Content-Type". "application/json"))))
         (url-request-data (if data
                               (encode-coding-string (json-encode data) 'utf-8)))
         (response nil))
@@ -308,7 +308,7 @@ CACHE to read from cache rather than query upstream."
   (if cache
       todoist--cached-projects
     (setq todoist--cached-projects
-          (append (todoist--query "GET" "/projects") nil))))
+          (append (assoc-default 'results (todoist--query "GET" "/projects")) nil))))
 
 (defun todoist--get-sections (&optional cache)
   "Get the list of all sections.
@@ -317,11 +317,11 @@ CACHE to read from cache rather than query upstream."
   (if cache
       todoist--cached-sections
     (setq todoist--cached-sections
-          (append (todoist--query "GET" "/sections") nil))))
+          (append (assoc-default 'results (todoist--query "GET" "/sections")) nil))))
 
 (defun todoist--get-tasks ()
   "Get the list of all tasks."
-  (append (todoist--query "GET" "/tasks") nil))
+  (append (assoc-default 'results (todoist--query "GET" "/tasks")) nil))
 
 (defun todoist--create-new-task (content due p)
   "Query todoist to create new task.
